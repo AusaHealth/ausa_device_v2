@@ -41,7 +41,7 @@ class DashboardContentV2 extends StatelessWidget {
                             child: SizedBox(
                               width: double.infinity,
                               child: DashboardCard(
-                                title: 'Connect with\nDoctor',
+                                title: 'Connect with Doctor',
                                 label: 'Upcoming',
                                 subtitle: 'Appointment with Dr.Chi',
                                 timing: '10 min',

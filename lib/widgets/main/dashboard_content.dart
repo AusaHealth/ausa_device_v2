@@ -41,7 +41,7 @@ class DashboardContent extends StatelessWidget {
                         timing: '',
                         imagePath: 'assets/images/take_your_tests.png'),
                     DashboardCard(
-                        title: 'Connect with\nDoctor',
+                        title: 'Connect with Doctor',
                         label: 'Upcoming',
                         subtitle: 'Call with Dr.Chi',
                         timing: 'in 10 mins',
