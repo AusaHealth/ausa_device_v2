@@ -59,6 +59,7 @@ class PreviousScansCard extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.fromLTRB(24, 24, 24, 8),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 0),
