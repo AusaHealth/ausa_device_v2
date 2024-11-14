@@ -79,12 +79,12 @@ class PreviousScansReadingDashboard extends StatelessWidget {
                       const SizedBox(width: 24), // Increased spacing
                       Container(
                         padding: const EdgeInsets.symmetric(
-                          horizontal: 12, // Increased padding
+                          horizontal: 12,
                           vertical: 6,
                         ),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFEEF2FF),
-                          borderRadius: BorderRadius.circular(8),
+                          color: theme.colorScheme.primary.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(12),
                         ),
                         child: Text(
                           unit,

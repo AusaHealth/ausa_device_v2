@@ -61,7 +61,7 @@ class UpcomingAppointmentCard extends StatelessWidget {
                   timing,
                   style: TextStyle(
                     color: Colors.amber[900],
-                    fontSize: 12,
+                    fontSize: 20,
                   ),
                 ),
               ),

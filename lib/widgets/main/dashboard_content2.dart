@@ -44,7 +44,7 @@ class DashboardContentV2 extends StatelessWidget {
                                 title: 'Connect with\nDoctor',
                                 label: 'Upcoming',
                                 subtitle: 'Appointment with Dr.Chi',
-                                timing: '10m mins',
+                                timing: '10 min',
                                 imagePath:
                                     'assets/images/connect_with_doctor.png',
                               ),
