@@ -1,5 +1,5 @@
-import 'package:ausa_device_test/widgets/misc/dashboard_card.dart';
-import 'package:ausa_device_test/widgets/misc/previous_scans_card.dart';
+import 'package:ausa/widgets/misc/dashboard_card.dart';
+import 'package:ausa/widgets/misc/previous_scans_card.dart';
 import 'package:flutter/material.dart';
 
 class DashboardContentV3 extends StatelessWidget {

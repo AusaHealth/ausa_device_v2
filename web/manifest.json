@@ -1,6 +1,6 @@
 {
-    "name": "ausa_device_test",
-    "short_name": "ausa_device_test",
+    "name": "ausa",
+    "short_name": "ausa",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

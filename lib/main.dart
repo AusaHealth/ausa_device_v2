@@ -1,5 +1,5 @@
-import 'package:ausa_device_test/screens/homescreen.dart';
-import 'package:ausa_device_test/theme/main_theme.dart';
+import 'package:ausa/screens/homescreen.dart';
+import 'package:ausa/theme/main_theme.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 

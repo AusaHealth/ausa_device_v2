@@ -1,6 +1,6 @@
-import 'package:ausa_device_test/widgets/misc/previous_scans_reading.dart';
+import 'package:ausa/widgets/misc/previous_scans_reading.dart';
 import 'package:flutter/material.dart';
-import 'package:ausa_device_test/theme/main_theme.dart';
+import 'package:ausa/theme/main_theme.dart';
 
 class PreviousScansCard extends StatelessWidget {
   const PreviousScansCard({super.key});

@@ -1,5 +1,5 @@
-import 'package:ausa_device_test/theme/main_theme.dart';
-import 'package:ausa_device_test/widgets/misc/value_isnormal.dart';
+import 'package:ausa/theme/main_theme.dart';
+import 'package:ausa/widgets/misc/value_isnormal.dart';
 import 'package:flutter/material.dart';
 
 class PreviousScansReadingDashboard extends StatelessWidget {

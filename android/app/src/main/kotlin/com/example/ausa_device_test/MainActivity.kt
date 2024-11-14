@@ -1,4 +1,4 @@
-package com.example.ausa_device_test
+package com.example.ausa
 
 import io.flutter.embedding.android.FlutterActivity
 

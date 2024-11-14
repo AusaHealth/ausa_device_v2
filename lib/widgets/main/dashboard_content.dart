@@ -1,6 +1,6 @@
-import 'package:ausa_device_test/widgets/misc/dashboard_card.dart';
+import 'package:ausa/widgets/misc/dashboard_card.dart';
 import 'package:flutter/material.dart';
-// import 'package:ausa_device_test/data/dashboard_content.dart';
+// import 'package:ausa/data/dashboard_content.dart';
 
 class DashboardContent extends StatelessWidget {
   const DashboardContent({super.key});
