@@ -11,35 +11,35 @@ class PreviousScansCard extends StatelessWidget {
       'value': '120/80',
       'unit': 'mmHg',
       'icon': Icons.favorite_border,
-      'isNormal' : false,
+      'isNormal': false,
     },
     {
       'title': 'Blood Glucose',
       'value': '95',
       'unit': 'mg/dL',
       'icon': Icons.water_drop_outlined,
-       'isNormal' : true,
+      'isNormal': true,
     },
     {
       'title': 'SpO2',
       'value': '98',
       'unit': '%',
       'icon': Icons.air,
-      'isNormal' : true,
+      'isNormal': true,
     },
     {
       'title': 'Heart Rate',
       'value': '72',
       'unit': 'bpm',
       'icon': Icons.favorite,
-      'isNormal' : true,
+      'isNormal': true,
     },
     {
       'title': 'Temperature',
       'value': '37.2',
       'unit': '°C',
       'icon': Icons.thermostat_outlined,
-      'isNormal' : false,
+      'isNormal': false,
     },
   ];
 
@@ -54,10 +54,7 @@ class PreviousScansCard extends StatelessWidget {
         elevation: 0,
         color: theme.colorScheme.cardColorMain,
         shape: RoundedRectangleBorder(
-          side: BorderSide(
-            color: Colors.black45,
-            width: 2
-          ),
+          side: const BorderSide(color: Colors.black12, width: 1),
           borderRadius: BorderRadius.circular(32),
         ),
         child: Padding(
@@ -67,9 +64,16 @@ class PreviousScansCard extends StatelessWidget {
             children: [
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 0),
-                child: Text(
-                  'Previous Scans',
-                  style: theme.textTheme.displayLarge,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Previous Scans',
+                      style: theme.textTheme.displayLarge,
+                    ),
+                    TextButton(onPressed: () {}, child: const Text("View All"))
+                  ],
                 ),
               ),
               Expanded(
@@ -77,7 +81,7 @@ class PreviousScansCard extends StatelessWidget {
                   children: [
                     SingleChildScrollView(
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 4),
+                        padding: const EdgeInsets.symmetric(vertical: 16),
                         child: Column(
                           children: [
                             ...readings.asMap().entries.map((entry) {
@@ -140,36 +144,6 @@ class PreviousScansCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 16),
-              Align(
-                alignment: Alignment.bottomRight,
-                child: OutlinedButton.icon(
-                  onPressed: () {},
-                  style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 24,
-                      vertical: 12,
-                    ),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(100),
-                    ),
-                    side: BorderSide(
-                      color: theme.colorScheme.primary,
-                      width: 3,
-                    ),
-                  ),
-                  icon: const Text(
-                    'View All',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  label: const Icon(
-                    Icons.arrow_forward_rounded,
-                    size: 24,
-                  ),
-                ),
-              ),
             ],
           ),
         ),
