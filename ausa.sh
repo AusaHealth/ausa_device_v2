@@ -2,7 +2,7 @@
 
 # variables
 BINARY_PATH="build/linux/arm64/release/bundle/ausa"
-REPO_PATH="/path/to/your/flutter/project"
+REPO_PATH="/home/prarlabs/Desktop/ausa_device_test"
 GITHUB_BRANCH="main"
 # variables
 
