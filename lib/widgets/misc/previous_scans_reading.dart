@@ -74,6 +74,7 @@ class PreviousScansReadingDashboard extends StatelessWidget {
                         style: theme.textTheme.displayLarge?.copyWith(
                           fontWeight: FontWeight.bold,
                           color: theme.colorScheme.textPrimary,
+                          fontSize: 48
                         ),
                       ),
                       const SizedBox(width: 24), // Increased spacing
@@ -84,7 +85,7 @@ class PreviousScansReadingDashboard extends StatelessWidget {
                         ),
                         decoration: BoxDecoration(
                           color: theme.colorScheme.primary.withOpacity(0.1),
-                          borderRadius: BorderRadius.circular(12),
+                          borderRadius: BorderRadius.circular(24),
                         ),
                         child: Text(
                           unit,

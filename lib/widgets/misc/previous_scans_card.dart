@@ -67,14 +67,12 @@ class PreviousScansCard extends StatelessWidget {
                   style: theme.textTheme.displayLarge,
                 ),
               ),
-              const SizedBox(height: 12),
               Expanded(
                 child: Stack(
                   children: [
-                    // Scrollable content
                     SingleChildScrollView(
                       child: Padding(
-                        padding: const EdgeInsets.symmetric(vertical: 24),
+                        padding: const EdgeInsets.symmetric(vertical: 4),
                         child: Column(
                           children: [
                             ...readings.asMap().entries.map((entry) {

@@ -8,8 +8,8 @@ class IsNormalCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    const Color green = Color(0xFF059669);
-    Color red = theme.colorScheme.error;
+    const Color green = Colors.green;
+    Color red = Colors.red;
 
     return IntrinsicWidth(
       // Added this widget
@@ -17,7 +17,7 @@ class IsNormalCard extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(32),
-          border: Border.all(color: isNormal ? green : red),
+          // border: Border.all(color: isNormal ? green : red),
           color: !isNormal ? red.withOpacity(0.1) : green.withOpacity(0.1),
         ),
         child: Row(
@@ -26,12 +26,12 @@ class IsNormalCard extends StatelessWidget {
             !isNormal
                 ? Icon(
                     Icons.arrow_downward,
-                    color: theme.colorScheme.error,
+                    color: red,
                     size: 24,
                   )
                 : const Icon(
                     Icons.arrow_upward,
-                    color: Color(0xFF059669),
+                    color: green,
                     size: 24,
                   ),
             const SizedBox(width: 8),
@@ -39,14 +39,14 @@ class IsNormalCard extends StatelessWidget {
                 ? Text(
                     'Abnormal',
                     style: theme.textTheme.bodyLarge!.copyWith(
-                      color: theme.colorScheme.error,
+                      color: red,
                       fontWeight: FontWeight.w600,
                     ),
                   )
                 : Text(
                     'Normal',
                     style: theme.textTheme.bodyLarge!.copyWith(
-                      color: const Color(0xFF059669),
+                      color: green,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
