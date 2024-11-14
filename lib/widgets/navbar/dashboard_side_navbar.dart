@@ -78,9 +78,10 @@ class _CollapsibleSideNavbarState extends State<CollapsibleSideNavbar>
                 child: Column(
                   children: [
                     SizedBox(
-                      height: 60,
+                      height: 100,
                       child: IconButton(
                         icon: AnimatedIcon(
+                          size: 32,
                           icon: AnimatedIcons.menu_close,
                           progress: _controller,
                         ),
@@ -91,7 +92,7 @@ class _CollapsibleSideNavbarState extends State<CollapsibleSideNavbar>
                     Expanded(
                       child: Center( 
                         child: ListView(
-                          shrinkWrap: true,
+                          
                           padding: EdgeInsets.symmetric(
                             horizontal: _controller.value > 0.5 ? 8 : 4,
                           ),

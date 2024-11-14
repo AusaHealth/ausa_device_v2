@@ -27,7 +27,7 @@ class NavItem extends StatelessWidget {
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 200),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(100),
+            borderRadius: BorderRadius.circular(16),
             color: isSelected
                 ? Theme.of(context).colorScheme.primaryContainer
                 : Colors.transparent,

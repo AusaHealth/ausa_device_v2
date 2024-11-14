@@ -57,11 +57,11 @@ class PreviousScansCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(32),
         ),
         child: Padding(
-          padding: const EdgeInsets.fromLTRB(12, 24, 12, 8),
+          padding: const EdgeInsets.fromLTRB(24, 24, 24, 8),
           child: Column(
             children: [
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
+                padding: const EdgeInsets.symmetric(horizontal: 0),
                 child: Text(
                   'Previous Scans',
                   style: theme.textTheme.displayLarge,

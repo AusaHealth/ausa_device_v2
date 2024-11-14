@@ -23,7 +23,7 @@ class PreviousScansReadingDashboard extends StatelessWidget {
     final theme = Theme.of(context);
 
     return Container(
-      margin: const EdgeInsets.symmetric(vertical: 4),
+      margin: const EdgeInsets.symmetric(vertical: 12),
       child: Container(
         padding: const EdgeInsets.symmetric(
           horizontal: 16,
