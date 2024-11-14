@@ -31,7 +31,12 @@ class DashboardCard extends StatelessWidget {
         elevation: 0,
         color: theme.colorScheme.cardColorMain,
         shape: RoundedRectangleBorder(
+          side: const BorderSide(
+            color: Colors.black38,
+            width: 2
+          ),
           borderRadius: BorderRadius.circular(32),
+          
         ),
         child: Stack(
           children: [

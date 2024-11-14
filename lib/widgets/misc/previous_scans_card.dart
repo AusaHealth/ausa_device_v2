@@ -54,6 +54,10 @@ class PreviousScansCard extends StatelessWidget {
         elevation: 0,
         color: theme.colorScheme.cardColorMain,
         shape: RoundedRectangleBorder(
+          side: BorderSide(
+            color: Colors.black45,
+            width: 2
+          ),
           borderRadius: BorderRadius.circular(32),
         ),
         child: Padding(
