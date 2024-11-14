@@ -1,3 +1,4 @@
+// import 'package:ausa_device_test/widgets/main/dasboard_content3.dart';
 import 'package:ausa_device_test/widgets/navbar/dashboard_side_navbar.dart';
 import 'package:ausa_device_test/widgets/main/help_content.dart';
 import 'package:ausa_device_test/widgets/main/previous_scans_content.dart';
@@ -24,6 +25,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   final List<Widget> _pages = const [
     //DashboardContent(),
+    // DashboardContentV3(),
     DashboardContentV2(),
     NotificationContent(),
     PreviousScansContent(),

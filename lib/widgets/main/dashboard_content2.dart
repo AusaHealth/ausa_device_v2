@@ -1,4 +1,5 @@
 import 'package:ausa_device_test/widgets/misc/dashboard_card.dart';
+import 'package:ausa_device_test/widgets/misc/previous_scans_card.dart';
 import 'package:flutter/material.dart';
 
 class DashboardContentV2 extends StatelessWidget {
@@ -28,6 +29,9 @@ class DashboardContentV2 extends StatelessWidget {
                               width: double.infinity,
                               child: DashboardCard(
                                 title: 'Take your tests',
+                                label: '',
+                                subtitle: '',
+                                timing: '',
                                 imagePath: 'assets/images/take_your_tests.png',
                               ),
                             ),
@@ -39,8 +43,8 @@ class DashboardContentV2 extends StatelessWidget {
                               child: DashboardCard(
                                 title: 'Connect with\nDoctor',
                                 label: 'Upcoming',
-                                subtitle: 'Call with Dr.Chi',
-                                timing: 'in 10 mins',
+                                subtitle: 'Appointment with Dr.Chi',
+                                timing: '10m mins',
                                 imagePath:
                                     'assets/images/connect_with_doctor.png',
                               ),
@@ -49,13 +53,11 @@ class DashboardContentV2 extends StatelessWidget {
                         ],
                       ),
                     ),
-                    const SizedBox(width: 5),
+                    const SizedBox(width: 5), // Spacing between columns
+                    // Second column with full-height card
                     SizedBox(
                       width: columnWidth,
-                      child: const DashboardCard(
-                        title: 'Previous scans',
-                        imagePath: 'assets/images/connect_with_doctor.png',
-                      ),
+                      child: const PreviousScansCard(),
                     ),
                   ],
                 );

@@ -63,7 +63,7 @@ class AppTheme {
   static TextTheme _buildTextTheme(Color textColor) {
     return TextTheme(
       displayLarge: _baseTextStyle.copyWith(
-        fontSize: 44,
+        fontSize: 48,
         fontWeight: FontWeight.w800,
         color: textColor,
       ),
