@@ -1,80 +1,88 @@
-import json
-import time
-import random
-from bluez_peripheral.gatt.service import Service
-from bluez_peripheral.gatt.characteristic import characteristic, CharacteristicFlags as Flags
-from bluez_peripheral.util import *
-from bluez_peripheral.advert import Advertisement
-from bluez_peripheral.agent import NoIoAgent
 import asyncio
+import json
+import random
+from bleak import BleakServer
+from bleak.backends.characteristic import BleakGATTCharacteristic
+from bleak.backends.service import BleakGATTService
 
 # Define UUIDs for our service and characteristic
 BP_SERVICE_UUID = "12345678-1234-5678-1234-56789abc0010"
 BP_CHARACTERISTIC_UUID = "12345678-1234-5678-1234-56789abc0011"
 
-class BPService(Service):
+class BPMonitorServer:
     def __init__(self):
-        # Initialize the service with our UUID
-        super().__init__(BP_SERVICE_UUID, True)
-        self.bp_data = {"systolic": 120, "diastolic": 80}
+        self.server = None
+        self.connected_clients = set()
+        self.bp_characteristic = None
 
-    @characteristic(BP_CHARACTERISTIC_UUID, Flags.NOTIFY | Flags.READ)
-    def bp_measurement(self, options):
-        # Convert the BP data to JSON and then to bytes
-        return bytes(json.dumps(self.bp_data), 'utf-8')
+    async def start(self):
+        # Create the GATT service
+        bp_service = BleakGATTService(BP_SERVICE_UUID)
+        
+        # Create the BP characteristic
+        self.bp_characteristic = BleakGATTCharacteristic(
+            uuid=BP_CHARACTERISTIC_UUID,
+            service_uuid=BP_SERVICE_UUID,
+            properties=["read", "notify"],
+            value=bytes(json.dumps({"systolic": 120, "diastolic": 80}), 'utf-8')
+        )
+        bp_service.add_characteristic(self.bp_characteristic)
 
-    def update_bp(self, systolic, diastolic):
-        self.bp_data = {
-            "systolic": systolic,
-            "diastolic": diastolic
-        }
-        # Notify subscribers of new data
-        self.changed(self.bp_measurement)
+        # Create and start the server
+        self.server = BleakServer()
+        self.server.services.add_service(bp_service)
+        
+        await self.server.start()
+        print(f"Server started. Address: {self.server.address}")
+
+    async def update_bp(self):
+        while True:
+            try:
+                # Generate random BP values
+                systolic = random.randint(90, 140)
+                diastolic = random.randint(60, 90)
+                
+                # Create JSON data
+                data = json.dumps({
+                    "systolic": systolic,
+                    "diastolic": diastolic
+                })
+                
+                # Update characteristic value
+                value = bytes(data, 'utf-8')
+                await self.bp_characteristic.set_value(value)
+                
+                print(f"Updated BP: Systolic {systolic}, Diastolic {diastolic}")
+                await asyncio.sleep(1)
+                
+            except Exception as e:
+                print(f"Error updating BP: {e}")
+                await asyncio.sleep(1)
+
+    async def stop(self):
+        if self.server:
+            await self.server.stop()
+            print("Server stopped")
 
 async def main():
-    # Initialize the BLE peripheral
-    bus = await get_message_bus()
-    
-    # Create and register our BP service
-    service = BPService()
-    await service.register(bus)
-    
-    # Create an agent to handle pairing
-    agent = NoIoAgent()
-    await agent.register(bus)
-    
-    # Create an advertisement
-    adapter = await Adapter.get_first(bus)
-    advertisement = Advertisement(
-        localName="BP Monitor",
-        serviceUUIDs=[BP_SERVICE_UUID],
-        appearance=0x0340,  # Generic Health Device
-    )
-    
-    print("Starting BP Monitor Service...")
+    server = BPMonitorServer()
     
     try:
-        # Start advertising
-        await advertisement.register(bus, adapter)
-        print("Advertising started. Waiting for connections...")
+        await server.start()
+        print("BP Monitor server is running. Press Ctrl+C to stop.")
         
-        # Main loop to update BP values
-        while True:
-            # Generate random BP values
-            systolic = random.randint(90, 140)
-            diastolic = random.randint(60, 90)
-            
-            # Update the service with new values
-            service.update_bp(systolic, diastolic)
-            print(f"Updated BP: Systolic {systolic}, Diastolic {diastolic}")
-            
-            # Wait before next update
-            await asyncio.sleep(1)
-            
+        # Start updating BP values
+        await server.update_bp()
+        
     except KeyboardInterrupt:
-        print("\nStopping advertisement...")
-        await advertisement.unregister()
-        print("Stopped")
+        print("\nShutting down...")
+    finally:
+        await server.stop()
 
 if __name__ == "__main__":
+    # Set up logging
+    import logging
+    logging.basicConfig(level=logging.INFO)
+    
+    # Run the server
     asyncio.run(main())
