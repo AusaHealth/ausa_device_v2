@@ -1,62 +1,45 @@
-from bluetooth import BluetoothSocket, RFCOMM, PORT_ANY, SERIAL_PORT_CLASS, SERIAL_PORT_PROFILE, advertise_service
+import socket
 import json
 import time
-import random  # For simulating sensor data
+import random
 
-def start_bluetooth_server():
-    # Create a Bluetooth server socket
-    server_sock = BluetoothSocket(RFCOMM)
-    server_sock.bind(("", PORT_ANY))
+def create_bluetooth_socket():
+    server_sock = socket.socket(socket.AF_BLUETOOTH, socket.SOCK_STREAM, socket.BTPROTO_RFCOMM)
+    server_sock.bind(("", 1))  # Use port 1 for RFCOMM
     server_sock.listen(1)
-
-    # Get the port the server is listening on
-    port = server_sock.getsockname()[1]
-
-    # Advertise the service
-    uuid = "94f39d29-7d6d-437d-973b-fba39e49d4ee"  # Arbitrary UUID
-    advertise_service(server_sock, "PiSensor",
-                     service_id=uuid,
-                     service_classes=[uuid, SERIAL_PORT_CLASS],
-                     profiles=[SERIAL_PORT_PROFILE])
-
-    print(f"Waiting for connection on RFCOMM channel {port}")
     return server_sock
 
 def main():
-    server_sock = start_bluetooth_server()
+    server_sock = create_bluetooth_socket()
+    print("Waiting for connection...")
     
     try:
         while True:
-            print("Waiting for a connection...")
-            client_sock, client_info = server_sock.accept()
-            print(f"Accepted connection from {client_info}")
-
+            client_sock, address = server_sock.accept()
+            print(f"Accepted connection from {address}")
+            
             try:
                 while True:
-                    # Simulate BP sensor data
-                    sensor_data = {
+                    # Generate BP data
+                    bp_data = {
                         "systolic": random.randint(90, 140),
                         "diastolic": random.randint(60, 90)
                     }
                     
                     # Convert to JSON and send
-                    json_data = json.dumps(sensor_data)
+                    json_data = json.dumps(bp_data)
                     print(f"Sending data: {json_data}")
                     client_sock.send(json_data.encode())
-                    
-                    # Wait for 1 second before sending next reading
                     time.sleep(1)
                     
-            except IOError as e:
+            except Exception as e:
                 print(f"Error: {e}")
-                print("Client disconnected")
                 client_sock.close()
                 
     except KeyboardInterrupt:
-        print("\nShutting down server...")
+        print("\nShutting down...")
     finally:
         server_sock.close()
-        print("Server closed")
 
 if __name__ == "__main__":
     main()
