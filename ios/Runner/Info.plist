@@ -32,15 +32,19 @@
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
-	<key>NSBluetoothAlwaysUsageDescription</key>
-    <string>Need Bluetooth access to connect to BP Monitor</string>
-    <key>NSBluetoothPeripheralUsageDescription</key>
-    <string>Need Bluetooth access to connect to BP Monitor</string>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
+	</array>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>Need BLE access to connect to BP Monitor</string>
+	<key>NSBluetoothPeripheralUsageDescription</key>
+	<string>Need BLE access to connect to BP Monitor</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>bluetooth-central</string>
 	</array>
 	<key>UISupportedInterfaceOrientations~ipad</key>
 	<array>

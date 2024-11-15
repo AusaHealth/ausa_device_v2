@@ -1,70 +1,80 @@
-import socket
 import json
 import time
 import random
-import subprocess
+from bluez_peripheral.gatt.service import Service
+from bluez_peripheral.gatt.characteristic import characteristic, CharacteristicFlags as Flags
+from bluez_peripheral.util import *
+from bluez_peripheral.advert import Advertisement
+from bluez_peripheral.agent import NoIoAgent
+import asyncio
 
-def get_bluetooth_address():
-    """Get the Bluetooth address of the local device"""
-    try:
-        # Run hciconfig command and capture output
-        result = subprocess.check_output(['hciconfig']).decode('utf-8')
-        # Find the BD Address line
-        for line in result.split('\n'):
-            if 'BD Address:' in line:
-                # Extract and return the address
-                return line.split('BD Address: ')[1].split(' ')[0]
-    except:
-        return "00:00:00:00:00:00"  # Return default address if failed
+# Define UUIDs for our service and characteristic
+BP_SERVICE_UUID = "12345678-1234-5678-1234-56789abc0010"
+BP_CHARACTERISTIC_UUID = "12345678-1234-5678-1234-56789abc0011"
 
-def create_bluetooth_socket():
-    # Get the local Bluetooth address
-    bd_addr = get_bluetooth_address()
-    print(f"Using Bluetooth address: {bd_addr}")
+class BPService(Service):
+    def __init__(self):
+        # Initialize the service with our UUID
+        super().__init__(BP_SERVICE_UUID, True)
+        self.bp_data = {"systolic": 120, "diastolic": 80}
+
+    @characteristic(BP_CHARACTERISTIC_UUID, Flags.NOTIFY | Flags.READ)
+    def bp_measurement(self, options):
+        # Convert the BP data to JSON and then to bytes
+        return bytes(json.dumps(self.bp_data), 'utf-8')
+
+    def update_bp(self, systolic, diastolic):
+        self.bp_data = {
+            "systolic": systolic,
+            "diastolic": diastolic
+        }
+        # Notify subscribers of new data
+        self.changed(self.bp_measurement)
+
+async def main():
+    # Initialize the BLE peripheral
+    bus = await get_message_bus()
     
-    server_sock = socket.socket(socket.AF_BLUETOOTH, socket.SOCK_STREAM, socket.BTPROTO_RFCOMM)
-    server_sock.bind((bd_addr, 1))  # Use port 1 for RFCOMM
-    server_sock.listen(1)
-    return server_sock
-
-def main():
-    print("Starting Bluetooth BP Sensor...")
+    # Create and register our BP service
+    service = BPService()
+    await service.register(bus)
+    
+    # Create an agent to handle pairing
+    agent = NoIoAgent()
+    await agent.register(bus)
+    
+    # Create an advertisement
+    adapter = await Adapter.get_first(bus)
+    advertisement = Advertisement(
+        localName="BP Monitor",
+        serviceUUIDs=[BP_SERVICE_UUID],
+        appearance=0x0340,  # Generic Health Device
+    )
+    
+    print("Starting BP Monitor Service...")
     
     try:
-        server_sock = create_bluetooth_socket()
-        print("Waiting for connection...")
+        # Start advertising
+        await advertisement.register(bus, adapter)
+        print("Advertising started. Waiting for connections...")
         
+        # Main loop to update BP values
         while True:
-            client_sock, address = server_sock.accept()
-            print(f"Accepted connection from {address}")
+            # Generate random BP values
+            systolic = random.randint(90, 140)
+            diastolic = random.randint(60, 90)
             
-            try:
-                while True:
-                    # Generate BP data
-                    bp_data = {
-                        "systolic": random.randint(90, 140),
-                        "diastolic": random.randint(60, 90)
-                    }
-                    
-                    # Convert to JSON and send
-                    json_data = json.dumps(bp_data)
-                    print(f"Sending data: {json_data}")
-                    client_sock.send(json_data.encode())
-                    time.sleep(1)
-                    
-            except Exception as e:
-                print(f"Error: {e}")
-                client_sock.close()
-                
+            # Update the service with new values
+            service.update_bp(systolic, diastolic)
+            print(f"Updated BP: Systolic {systolic}, Diastolic {diastolic}")
+            
+            # Wait before next update
+            await asyncio.sleep(1)
+            
     except KeyboardInterrupt:
-        print("\nShutting down...")
-    except Exception as e:
-        print(f"Failed to start server: {e}")
-    finally:
-        try:
-            server_sock.close()
-        except:
-            pass
+        print("\nStopping advertisement...")
+        await advertisement.unregister()
+        print("Stopped")
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())
