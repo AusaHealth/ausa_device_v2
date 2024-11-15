@@ -1,117 +1,55 @@
-import subprocess
-import json
-import time
+import asyncio
+from bleak import BleakServer
 import random
-import os
+import struct
 
-def get_connected_devices():
-    """Check for connected Bluetooth devices"""
+# Bluetooth settings
+DEVICE_NAME = "BP Monitor"
+SERVICE_UUID = "00001810-0000-1000-8000-00805f9b34fb"  # Blood Pressure Service UUID
+CHARACTERISTIC_UUID = "00002a35-0000-1000-8000-00805f9b34fb"  # Blood Pressure Measurement
+
+# Simulated BP readings
+def generate_bp_reading():
+    systolic = random.randint(110, 140)  # Random systolic between 110-140
+    diastolic = random.randint(70, 90)  # Random diastolic between 70-90
+    mean_arterial_pressure = (systolic + 2 * diastolic) // 3
+    return systolic, diastolic, mean_arterial_pressure
+
+# Format the BP reading into Bluetooth spec-compliant bytes
+def format_bp_reading(systolic, diastolic, mean_arterial_pressure):
+    flags = 0x01  # Units in mmHg
+    measurement = struct.pack(
+        "<BHHH",
+        flags,
+        systolic,
+        diastolic,
+        mean_arterial_pressure,
+    )
+    return measurement
+
+# Bluetooth GATT server
+async def start_server():
+    server = BleakServer()
+    server.set_device_name(DEVICE_NAME)
+
+    @server.characteristic(CHARACTERISTIC_UUID)
+    def on_read(offset: int):
+        # Generate and return simulated BP readings
+        systolic, diastolic, mean_arterial_pressure = generate_bp_reading()
+        print(f"Sending BP reading: {systolic}/{diastolic}")
+        return format_bp_reading(systolic, diastolic, mean_arterial_pressure)
+
+    await server.start_advertising([SERVICE_UUID])
+    print(f"{DEVICE_NAME} is now advertising...")
+
     try:
-        result = subprocess.check_output(['bluetoothctl', 'devices'], text=True)
-        return len(result.strip().split('\n')) > 0
-    except:
-        return False
-
-def get_bt_address():
-    """Get the Bluetooth address of the Pi"""
-    try:
-        result = subprocess.check_output(['hciconfig'], text=True)
-        for line in result.split('\n'):
-            if 'BD Address' in line:
-                return line.split('Address: ')[1].split(' ')[0]
-    except:
-        return "Unknown"
-    return "Unknown"
-
-def setup_bluetooth():
-    """Setup Bluetooth with a distinctive name"""
-    # Reset Bluetooth interface
-    os.system('sudo hciconfig hci0 down')
-    os.system('sudo hciconfig hci0 up')
-    
-    # Set a distinctive device name
-    DEVICE_NAME = "BP_MONITOR_PI"
-    os.system(f'sudo hciconfig hci0 name "{DEVICE_NAME}"')
-    
-    # Make device discoverable
-    os.system('sudo hciconfig hci0 piscan')
-    
-    # Get and print device info
-    bt_address = get_bt_address()
-    print(f"\nDevice Details:")
-    print(f"Name: {DEVICE_NAME}")
-    print(f"Bluetooth Address: {bt_address}")
-    print("\nBluetooth setup complete")
-    
-    return DEVICE_NAME
-
-def check_connection_status():
-    """Check if any device is connected using bluetoothctl"""
-    try:
-        # Get list of connected devices
-        result = subprocess.check_output(['bluetoothctl', 'info'], text=True)
-        return "Connected: yes" in result
-    except:
-        return False
-
-def main():
-    print("Starting BP Monitor Setup...")
-    device_name = setup_bluetooth()
-    print("\nWaiting for connections...")
-    
-    last_status = False  # Track last connection status
-    last_values = {'systolic': 0, 'diastolic': 0}  # Track last sent values
-    
-    try:
-        while True:
-            is_connected = check_connection_status()
-            
-            if is_connected:
-                if not last_status:  # Just connected
-                    print("\nDevice connected! Starting data transmission...")
-                
-                # Generate new values only when connected
-                systolic = random.randint(90, 140)
-                diastolic = random.randint(60, 90)
-                
-                # Only print if values changed
-                if systolic != last_values['systolic'] or diastolic != last_values['diastolic']:
-                    print(f"\rSending - Systolic: {systolic}, Diastolic: {diastolic}", end='', flush=True)
-                    last_values['systolic'] = systolic
-                    last_values['diastolic'] = diastolic
-            else:
-                if last_status:  # Just disconnected
-                    print("\nDevice disconnected. Waiting for new connection...")
-                    print(f"Looking for this device on your iPad as: {device_name}")
-            
-            last_status = is_connected
-            time.sleep(1)
-            
-    except KeyboardInterrupt:
-        print("\n\nStopping...")
+        await server.wait_for_connection()
+        print("Client connected!")
+        await asyncio.sleep(60)  # Keep server running for 1 minute
     finally:
-        os.system('sudo hciconfig hci0 down')
-        os.system('sudo hciconfig hci0 up')
-        print("Stopped")
+        await server.stop_advertising()
+        print("Server stopped.")
 
-def setup_prerequisites():
-    """Check and setup required permissions and tools"""
-    try:
-        # Check if bluetoothctl is available
-        subprocess.check_output(['which', 'bluetoothctl'])
-    except:
-        print("bluetoothctl not found. Installing bluetooth tools...")
-        os.system('sudo apt-get update')
-        os.system('sudo apt-get install -y bluetooth bluez')
-    
-    # Ensure bluetooth service is running
-    os.system('sudo systemctl start bluetooth')
-    
-    # Add current user to bluetooth group
-    os.system('sudo usermod -a -G bluetooth $USER')
-    
-    print("Prerequisites check completed")
-
+# Run the server
 if __name__ == "__main__":
-    setup_prerequisites()
-    main()
+    asyncio.run(start_server())
