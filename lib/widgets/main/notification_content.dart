@@ -25,7 +25,6 @@ class BPMonitorState extends State<BPMonitor> {
 
   Future<void> initBluetooth() async {
     try {
-      // Check if Bluetooth is supported
       if (await FlutterBluePlus.isSupported == false) {
         setState(() {
           connectionStatus = "Bluetooth not supported";
@@ -33,34 +32,20 @@ class BPMonitorState extends State<BPMonitor> {
         return;
       }
 
-      // Check if Bluetooth is turned on
       if (await FlutterBluePlus.adapterState.first == BluetoothAdapterState.on) {
         setState(() {
           connectionStatus = "Ready to scan";
         });
+        startScan();  // Auto-start scan
       } else {
         setState(() {
           connectionStatus = "Please turn on Bluetooth";
         });
       }
-
-      // Listen to adapter state changes
-      FlutterBluePlus.adapterState.listen((state) {
-        if (state == BluetoothAdapterState.on) {
-          setState(() {
-            connectionStatus = "Ready to scan";
-          });
-        } else {
-          setState(() {
-            connectionStatus = "Bluetooth is off";
-          });
-        }
-      });
-
     } catch (e) {
       print('Bluetooth initialization error: $e');
       setState(() {
-        connectionStatus = "Error initializing Bluetooth: $e";
+        connectionStatus = "Error: $e";
       });
     }
   }
@@ -75,18 +60,39 @@ class BPMonitorState extends State<BPMonitor> {
     });
 
     try {
-      // Start scanning
       await FlutterBluePlus.startScan(
         timeout: const Duration(seconds: 10),
+        androidUsesFineLocation: false,
       );
 
-      // Listen to scan results
       scanSubscription = FlutterBluePlus.scanResults.listen(
         (results) {
+          // Filter and sort results
+          final filteredResults = results.where((result) {
+            final name = result.device.platformName.toLowerCase();
+            // Look for our specific device name or partial matches
+            return name.contains('bp') || 
+                   name.contains('monitor') || 
+                   name.contains('pi');
+          }).toList();
+
+          // Sort by RSSI (signal strength)
+          filteredResults.sort((a, b) => b.rssi.compareTo(a.rssi));
+
           setState(() {
-            scanResults = results;
-            print('Found ${results.length} devices');
+            scanResults = filteredResults;
           });
+
+          // Print detailed info for debugging
+          for (final result in results) {
+            print('Found device:'
+                '\nName: ${result.device.platformName}'
+                '\nID: ${result.device.remoteId}'
+                '\nRSSI: ${result.rssi}'
+                '\nManufacturer Data: ${result.advertisementData.manufacturerData}'
+                '\nService UUIDs: ${result.advertisementData.serviceUuids}'
+                '\n-------------------');
+          }
         },
         onError: (error) {
           print('Scan error: $error');
@@ -95,13 +101,11 @@ class BPMonitorState extends State<BPMonitor> {
             isScanning = false;
           });
         },
-        onDone: () {
-          setState(() {
-            isScanning = false;
-            connectionStatus = "Scan complete";
-          });
-        },
       );
+
+      // After scan timeout
+      await Future.delayed(const Duration(seconds: 10));
+      await stopScan();
 
     } catch (e) {
       print('Error during scan: $e');
@@ -117,58 +121,10 @@ class BPMonitorState extends State<BPMonitor> {
       await FlutterBluePlus.stopScan();
     } catch (e) {
       print('Error stopping scan: $e');
-    }
-  }
-
-  Future<void> connectToDevice(BluetoothDevice device) async {
-    try {
+    } finally {
       setState(() {
-        connectionStatus = "Connecting to ${device.platformName}...";
-      });
-
-      await device.connect(timeout: const Duration(seconds: 4));
-      print('Connected to ${device.platformName}');
-      
-      setState(() {
-        connectionStatus = "Connected to ${device.platformName}";
-      });
-
-      // Discover services after connection
-      print('Discovering services...');
-      List<BluetoothService> services = await device.discoverServices();
-      print('Discovered ${services.length} services');
-
-      // Look for the service and characteristic we want
-      for (BluetoothService service in services) {
-        print('Service: ${service.uuid}');
-        for (BluetoothCharacteristic characteristic in service.characteristics) {
-          print('Characteristic: ${characteristic.uuid}');
-          
-          // If this characteristic can notify (send data)
-          if (characteristic.properties.notify) {
-            print('Found notify characteristic');
-            // Subscribe to notifications
-            await characteristic.setNotifyValue(true);
-            characteristic.lastValueStream.listen((value) {
-              if (value.isNotEmpty) {
-                try {
-                  // Try to parse the data as string
-                  String dataString = String.fromCharCodes(value);
-                  print('Received data: $dataString');
-                  // You might want to parse JSON here if your Pi is sending JSON
-                } catch (e) {
-                  print('Error processing data: $e');
-                }
-              }
-            });
-          }
-        }
-      }
-
-    } catch (e) {
-      print('Connection error: $e');
-      setState(() {
-        connectionStatus = "Connection failed: $e";
+        isScanning = false;
+        connectionStatus = "Scan complete";
       });
     }
   }
@@ -187,30 +143,23 @@ class BPMonitorState extends State<BPMonitor> {
       ),
       body: Column(
         children: [
-          // Status Bar
           Container(
             padding: const EdgeInsets.all(8.0),
             color: Colors.grey[200],
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+            child: Column(
               children: [
                 Text(
                   connectionStatus,
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
-                if (isScanning) 
-                  Container(
-                    margin: const EdgeInsets.only(left: 10),
-                    width: 20,
-                    height: 20,
-                    child: const CircularProgressIndicator(strokeWidth: 2),
-                  ),
+                const Text(
+                  'Looking for device named "BP_MONITOR_PI"',
+                  style: TextStyle(fontSize: 12),
+                ),
               ],
             ),
           ),
-          // Device List
           Expanded(
-            flex: 1,
             child: ListView.builder(
               itemCount: scanResults.length,
               itemBuilder: (context, index) {
@@ -219,66 +168,50 @@ class BPMonitorState extends State<BPMonitor> {
                 final name = device.platformName;
                 final rssi = result.rssi;
 
-                return ListTile(
-                  title: Text(name.isNotEmpty ? name : 'Unknown Device'),
-                  subtitle: Text('RSSI: $rssi\nID: ${device.remoteId}'),
-                  trailing: ElevatedButton(
-                    child: const Text('CONNECT'),
-                    onPressed: () => connectToDevice(device),
+                return Card(
+                  child: ListTile(
+                    title: Text(name.isEmpty ? 'Unknown Device' : name),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('ID: ${device.remoteId}'),
+                        Text('Signal Strength: $rssi dBm'),
+                        Text('Distance: ${_estimateDistance(rssi)} meters'),
+                      ],
+                    ),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Container(
+                          width: 20,
+                          height: 20,
+                          decoration: BoxDecoration(
+                            color: _getRssiColor(rssi),
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        ElevatedButton(
+                          child: const Text('CONNECT'),
+                          onPressed: () async {
+                            try {
+                              await device.connect();
+                              setState(() {
+                                connectionStatus = "Connected to ${device.platformName}";
+                              });
+                            } catch (e) {
+                              print('Connection error: $e');
+                              setState(() {
+                                connectionStatus = "Connection failed: $e";
+                              });
+                            }
+                          },
+                        ),
+                      ],
+                    ),
                   ),
                 );
               },
-            ),
-          ),
-          // BP Display
-          Expanded(
-            flex: 2,
-            child: Container(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text(
-                    'Systolic',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 10),
-                  SizedBox(
-                    height: 100,
-                    width: 100,
-                    child: CircularProgressIndicator(
-                      value: systolic / 200,
-                      valueColor: const AlwaysStoppedAnimation<Color>(Colors.red),
-                      strokeWidth: 10,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    '${systolic.round()} mmHg',
-                    style: const TextStyle(fontSize: 18),
-                  ),
-                  const SizedBox(height: 30),
-                  const Text(
-                    'Diastolic',
-                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 10),
-                  SizedBox(
-                    height: 100,
-                    width: 100,
-                    child: CircularProgressIndicator(
-                      value: diastolic / 120,
-                      valueColor: const AlwaysStoppedAnimation<Color>(Colors.blue),
-                      strokeWidth: 10,
-                    ),
-                  ),
-                  const SizedBox(height: 10),
-                  Text(
-                    '${diastolic.round()} mmHg',
-                    style: const TextStyle(fontSize: 18),
-                  ),
-                ],
-              ),
             ),
           ),
         ],
@@ -286,10 +219,23 @@ class BPMonitorState extends State<BPMonitor> {
     );
   }
 
+  Color _getRssiColor(int rssi) {
+    if (rssi >= -60) return Colors.green;
+    if (rssi >= -70) return Colors.yellow;
+    return Colors.red;
+  }
+
+  String _estimateDistance(int rssi) {
+    // Very rough distance estimation
+    if (rssi >= -60) return '< 1';
+    if (rssi >= -70) return '1-3';
+    if (rssi >= -80) return '3-5';
+    return '> 5';
+  }
+
   @override
   void dispose() {
     scanSubscription?.cancel();
-    stopScan();
     super.dispose();
   }
 }
