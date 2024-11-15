@@ -73,10 +73,9 @@ def main():
     adapter_path = "/org/bluez/hci0"
 
     # Enable BLE advertising
-    adapter = dbus.Interface(bus.get_object(BLUEZ_SERVICE_NAME, adapter_path),
-                              ADAPTER_INTERFACE)
-    adapter.Set("org.freedesktop.DBus.Properties",
-                "Powered", dbus.Boolean(True))
+    properties = dbus.Interface(bus.get_object(BLUEZ_SERVICE_NAME, adapter_path),
+                                "org.freedesktop.DBus.Properties")
+    properties.Set(ADAPTER_INTERFACE, "Powered", dbus.Boolean(True))
 
     app = Application(bus)
 
