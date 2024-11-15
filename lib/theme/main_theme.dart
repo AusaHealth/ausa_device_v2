@@ -55,7 +55,7 @@ extension CustomColorScheme on ColorScheme {
 }
 
 class AppTheme {
-  static const _seedColor = Color.fromARGB(255, 223, 223, 215);
+  static const _seedColor = Color.fromARGB(255, 215, 220, 223);
 
   // Text Styles
   static TextStyle get _baseTextStyle => GoogleFonts.poppins();

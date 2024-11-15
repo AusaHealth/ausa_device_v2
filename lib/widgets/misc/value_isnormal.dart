@@ -11,45 +11,34 @@ class IsNormalCard extends StatelessWidget {
     const Color green = Colors.green;
     Color red = Colors.red;
 
-    return IntrinsicWidth(
-      // Added this widget
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(32),
-          // border: Border.all(color: isNormal ? green : red),
-          color: !isNormal ? red.withOpacity(0.1) : green.withOpacity(0.1),
-        ),
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(32),
+        color: !isNormal ? red.withOpacity(0.1) : green.withOpacity(0.1),
+      ),
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(maxWidth: 200), // Adjust this value as needed
         child: Row(
           mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            !isNormal
-                ? Icon(
-                    Icons.arrow_downward,
-                    color: red,
-                    size: 24,
-                  )
-                : const Icon(
-                    Icons.arrow_upward,
-                    color: green,
-                    size: 24,
-                  ),
+            Icon(
+              !isNormal ? Icons.arrow_downward : Icons.arrow_upward,
+              color: !isNormal ? red : green,
+              size: 24,
+            ),
             const SizedBox(width: 8),
-            !isNormal
-                ? Text(
-                    'Abnormal',
-                    style: theme.textTheme.bodyLarge!.copyWith(
-                      color: red,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  )
-                : Text(
-                    'Normal',
-                    style: theme.textTheme.bodyLarge!.copyWith(
-                      color: green,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+            Flexible(
+              child: Text(
+                !isNormal ? 'Abnormal' : 'Normal',
+                style: theme.textTheme.bodyLarge!.copyWith(
+                  color: !isNormal ? red : green,
+                  fontWeight: FontWeight.w600,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
           ],
         ),
       ),

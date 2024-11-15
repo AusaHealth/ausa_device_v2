@@ -1,4 +1,5 @@
 // import 'package:ausa/widgets/main/dasboard_content3.dart';
+import 'package:ausa/widgets/main/notification_content.dart';
 import 'package:ausa/widgets/navbar/dashboard_side_navbar.dart';
 import 'package:ausa/widgets/main/help_content.dart';
 import 'package:ausa/widgets/main/previous_scans_content.dart';
@@ -6,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:ausa/widgets/misc/animated_page_content.dart';
 // import 'package:ausa/widgets/main/dashboard_content.dart';
 import 'package:ausa/widgets/main/dashboard_content2.dart';
-import 'package:ausa/widgets/main/notification_content.dart';
+// import 'package:ausa/widgets/main/notification_content.dart';
 import 'package:ausa/widgets/main/settings_content.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -27,7 +28,8 @@ class _HomeScreenState extends State<HomeScreen> {
     //DashboardContent(),
     // DashboardContentV3(),
     DashboardContentV2(),
-    NotificationContent(),
+    BPMonitor(),
+    // NotificationContent(),
     PreviousScansContent(),
     HelpContent(),
     SettingsContent(),
